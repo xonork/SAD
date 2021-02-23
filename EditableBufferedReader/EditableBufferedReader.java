@@ -24,8 +24,16 @@ public class EditableBufferedReader extends BufferedReader{
 	public int read() throws IOException{
 		int c = super.read();
 		//System.out.println(String.valueOf(c));
-		System.out.print((char)c);
-		return c;
+		//System.out.print((char)c);
+		if (c == ESC){
+			int next = super.read();
+			if (next == CSI){
+				int special = super.read();
+				return special;
+			}
+		else{
+			return c;
+		}
 	}
 
 	public  String readLine() throws IOException{
@@ -34,10 +42,11 @@ public class EditableBufferedReader extends BufferedReader{
 		String str = "";	
 		while( x != 3 ){
 			x = this.read();
+			line.addChar((char)x);
 			//System.out.print(x+"");
 			str+=(char)x;
-			
 		}
+		line.clearTerminal();
 		unsetRaw();
 		return str;	
 	}
