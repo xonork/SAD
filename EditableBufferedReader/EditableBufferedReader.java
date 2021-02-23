@@ -2,8 +2,11 @@ import java.io.*;
 
 public class EditableBufferedReader extends BufferedReader{
 
+	Line line;
+
 	public EditableBufferedReader(Reader in){
 		super(in);
+		line = new Line();
 		
 	}
 
@@ -25,18 +28,19 @@ public class EditableBufferedReader extends BufferedReader{
 		int c = super.read();
 		//System.out.println(String.valueOf(c));
 		//System.out.print((char)c);
-		if (c == ESC){
+		if (c == Keys.SC){
 			int next = super.read();
-			if (next == CSI){
+			if (next == Keys.CSI){
 				int special = super.read();
 				return special;
 			}
-		else{
-			return c;
 		}
+		
+		return c;
+		
 	}
 
-	public  String readLine() throws IOException{
+	public String readLine() throws IOException{
 		setRaw();
 		int x = 0;
 		String str = "";	
@@ -45,8 +49,10 @@ public class EditableBufferedReader extends BufferedReader{
 			line.addChar((char)x);
 			//System.out.print(x+"");
 			str+=(char)x;
+			line.clearTerminal();
+			System.out.print(line.toString());
 		}
-		line.clearTerminal();
+		
 		unsetRaw();
 		return str;	
 	}

@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class Line{
 
-	char[] buffer;
+	char[] buffer; //= {'a','b','c','d','e','g',' ',' ',' '};
 	int cursPos;
 	int numberOfChars;
 	int columns;
@@ -14,6 +14,17 @@ public class Line{
 		numberOfChars = 0;
 		columns = this.columnCounter();
 		buffer = new char[columns];
+		
+	}
+
+	public static void main(String[] args){
+		Line line = new Line();
+		line.fillBuffer();
+		line.moveLeft();
+		
+		line.deleteChar();
+		System.out.print(line.toString());
+
 	}
 
 	public void clearTerminal(){
@@ -22,22 +33,47 @@ public class Line{
 		for(int i = 0; i < numberOfChars; i++){
 			System.out.print("\b");		
 		}
+		
 	}
 
 
 	public void moveRight(){
+		
+		if((cursPos != numberOfChars) && (cursPos != columns))
+			cursPos++;
+		
+		
+		
+		
 	}
 
 	public void moveLeft(){
+		if(cursPos != 0)
+			cursPos--;
+		
 	} 
 
 	public void deleteChar(){
+
+		if(cursPos != 0){
+			for(int i = cursPos; i < numberOfChars; i++){
+				buffer[i-1] = buffer[i];		
+			}
+			this.moveLeft();
+			numberOfChars--;
+		}
 	}
 
 	public void addChar(char c){
-	
-		System.out.print(c);
-		numberOfChars++;
+
+		if(numberOfChars != columns){
+			for(int i = numberOfChars-1; i >= cursPos; i--){
+				buffer[i+1] = buffer[i];		
+			}
+			buffer[cursPos] = c;
+			numberOfChars++;
+			this.moveRight();
+		}
 
 	}
 
@@ -50,6 +86,11 @@ public class Line{
 	public void switchMode(int mode){
 	}
 
+	public void fillBuffer(){
+		
+		cursPos = 6;
+		numberOfChars = 6;
+	}
 	public static int columnCounter(){
 		String columns = null;
 		try{
@@ -68,6 +109,14 @@ public class Line{
 		catch (FileNotFoundException e){ e.printStackTrace(); }
 		return Integer.parseInt(columns);
 		
+	}
+
+	public String toString(){
+		String str = "";
+		for(int i = 0; i < numberOfChars; i++){
+			str+=buffer[i];
+		}
+		return str;
 	}
 
 		
