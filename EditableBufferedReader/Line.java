@@ -131,6 +131,16 @@ public class Line{
 	}
 
 	public void goEnd(){
+		if(numberOfChars < columns){
+			cursPos = numberOfChars;
+		}
+		else
+			cursPos = columns-1;
+
+		System.out.print("\033[" + (cursPos+1) + "G");
+		
+		
+
 	}
 
 	public void switchMode(){
