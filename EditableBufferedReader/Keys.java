@@ -1,4 +1,5 @@
- 
+import java.util.Arrays;
+import java.util.List;
 public final class Keys {
 
     private Keys() {
@@ -18,5 +19,7 @@ public final class Keys {
 	public static final int INSERT = 50;
 	public static final int SUPR = 51;
 	public static final int TILDE = 126;
-	
+	public static final int BACKSPACE = 127;
+	private static final Integer[] SPECIALS = new Integer[]{LEFT,RIGHT,HOME,END,INSERT,SUPR};
+	public static final List<Integer> SpecialsList = Arrays.asList(SPECIALS);
 }

@@ -22,7 +22,6 @@ public class Line{
 
 	public static void main(String[] args){
 		Line line = new Line();
-		line.fillBuffer();
 		line.moveLeft();
 		
 		line.deleteChar();
@@ -43,17 +42,20 @@ public class Line{
 
 	public void moveRight(){
 		
-		if((cursPos != numberOfChars) && (cursPos != columns))
-			cursPos++
-		
+		if((cursPos != numberOfChars) && (cursPos != columns-1)){
+			cursPos++;
+			System.out.print("\033[C");
+		}
 		
 		
 		
 	}
 
 	public void moveLeft(){
-		if(cursPos != 0)
+		if(cursPos != 0){
 			cursPos--;
+			System.out.print("\033[D");
+		}
 		
 		
 		
@@ -68,30 +70,63 @@ public class Line{
 			}
 			this.moveLeft();
 			numberOfChars--;
+			this.clearTerminal();
+			System.out.print(this.toString());
+			System.out.print("\033[" + (cursPos+1) + "G");
 		}
+	}
+
+	public void supr(){
+		if(cursPos!=numberOfChars){
+			for(int i = cursPos+1; i < numberOfChars; i++){
+				buffer[i-1] = buffer[i];			
+			}
+			numberOfChars--;
+			this.clearTerminal();
+			System.out.print(this.toString());
+			System.out.print("\033[" + (cursPos+1) + "G");
+		}
+		
 	}
 
 	public void addChar(char c){
 
-		if(numberOfChars != columns){
+		if((numberOfChars != columns) && !insert){
+			
 			for(int i = numberOfChars-1; i >= cursPos; i--){
 				buffer[i+1] = buffer[i];		
 			}
-			buffer[cursPos] = c;
 			numberOfChars++;
+			buffer[cursPos] = c;
 			this.moveRight();
 			this.clearTerminal();
 			System.out.print(this.toString());
 			System.out.print("\033[" + (cursPos+1) + "G");
 			
-			
-			
 		}
+		else if(insert){
+			if((cursPos >= numberOfChars) && (numberOfChars != columns)){
+				numberOfChars++;			
+			}
+			buffer[cursPos] = c;
+			this.moveRight();
+			this.clearTerminal();
+			System.out.print(this.toString());
+			System.out.print("\033[" + (cursPos+1) + "G");		
+	 	}	
+			
+			
+			
+			
+		
 		
 
 	}
 
 	public void goHome(){
+		cursPos=0;
+		System.out.print("\033[" + 0 + "G");
+		
 		
 	}
 
@@ -99,30 +134,22 @@ public class Line{
 	}
 
 	public void switchMode(){
+		insert = !insert;
 	}
 
-	public void fillBuffer(){
-		
-		cursPos = 6;
-		numberOfChars = 6;
-	}
+	
 	public static int columnCounter(){
-		String columns = null;
 		try{
-		//It executes the command tput cols 2 and writes the output in a temporal file
-		Runtime.getRuntime().exec(new String[] {"bash", "-c", "tput cols 2 > /tmp/columns.txt"  });    						
+			Process p = Runtime.getRuntime().exec("tput cols");
+			p.waitFor();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			String cols = reader.readLine();
+			return Integer.parseInt(cols);
+		} catch (Exception e) {
+			System.out.print(e);
 		}
-		catch (IOException e){ e.printStackTrace(); }
-
-		try{
-			File file = new File("/tmp/columns.txt");
-			Scanner reader = new Scanner(file);
-			columns = reader.nextLine();
+		return 0;
 			
-
-		}
-		catch (FileNotFoundException e){ e.printStackTrace(); }
-		return Integer.parseInt(columns);
 		
 	}
 
@@ -131,7 +158,7 @@ public class Line{
 		for(int i = 0; i < numberOfChars; i++){
 			str+=buffer[i];
 		}
-		System.out.print("\033[" + cursPos + "D");
+		//System.out.print("\033[" + cursPos + "D");
 		return str;
 	}
 

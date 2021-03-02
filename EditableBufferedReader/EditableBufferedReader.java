@@ -3,6 +3,7 @@ import java.io.*;
 public class EditableBufferedReader extends BufferedReader{
 
 	private Line line;
+	
 
 	public EditableBufferedReader(Reader in){
 		super(in);
@@ -26,13 +27,15 @@ public class EditableBufferedReader extends BufferedReader{
 
 	public int read() throws IOException{
 		int c = super.read();
-		//System.out.println(String.valueOf(c));
-		//System.out.print((char)c);
+		
 		if (c == Keys.ESC){
 			int next = super.read();
 			if (next == Keys.CSI){
 				int special = super.read();
-				return special;
+				if(Keys.SpecialsList.contains(special))
+					return (special);
+				else
+					return -1;
 			}
 		}
 		
@@ -46,6 +49,7 @@ public class EditableBufferedReader extends BufferedReader{
 		String str = "";	
 		while( (x != Keys.EXIT) && (x != Keys.ENTER)){
 			x = this.read();
+			
 			/*line.addChar((char)x);
 			//System.out.print(x+"");
 			str+=(char)x;
@@ -54,13 +58,11 @@ public class EditableBufferedReader extends BufferedReader{
 	
 			switch(x){
 				case Keys.LEFT:
-					System.out.print("\033[D");
 					line.moveLeft();
 					
 				break;
 
 				case Keys.RIGHT:
-					System.out.print("\033[C");
 					line.moveRight();
 				break;
 
@@ -77,16 +79,28 @@ public class EditableBufferedReader extends BufferedReader{
 						line.switchMode();
 				break;
 
+				case Keys.BACKSPACE:
+					line.deleteChar();
+				break;
+
+				case Keys.SUPR:
+					if(super.read() == Keys.TILDE)
+						line.supr();
+
+				case -1:
+				break;
+					
+
 				default:
 					line.addChar((char)x);
-					str+=(char)x;
+					
 			}
 					
 					
 		
 			
 		}
-		
+		str = line.toString();
 		unsetRaw();
 		return str;	
 	}
