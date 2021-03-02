@@ -4,16 +4,19 @@ import java.util.Scanner;
 
 public class Line{
 
-	char[] buffer; //= {'a','b','c','d','e','g',' ',' ',' '};
-	int cursPos;
-	int numberOfChars;
-	int columns;
+	private char[] buffer; //= {'a','b','c','d','e','g',' ',' ',' '};
+	private int cursPos;
+	private int numberOfChars;
+	private int columns;
+	private boolean insert;
 
 	public Line(){
 		cursPos = 0;
 		numberOfChars = 0;
+		insert = false;
 		columns = this.columnCounter();
 		buffer = new char[columns];
+		
 		
 	}
 
@@ -34,13 +37,14 @@ public class Line{
 			System.out.print("\b");		
 		}
 		
+		
 	}
 
 
 	public void moveRight(){
 		
 		if((cursPos != numberOfChars) && (cursPos != columns))
-			cursPos++;
+			cursPos++
 		
 		
 		
@@ -50,6 +54,9 @@ public class Line{
 	public void moveLeft(){
 		if(cursPos != 0)
 			cursPos--;
+		
+		
+		
 		
 	} 
 
@@ -73,17 +80,25 @@ public class Line{
 			buffer[cursPos] = c;
 			numberOfChars++;
 			this.moveRight();
+			this.clearTerminal();
+			System.out.print(this.toString());
+			System.out.print("\033[" + (cursPos+1) + "G");
+			
+			
+			
 		}
+		
 
 	}
 
 	public void goHome(){
+		
 	}
 
 	public void goEnd(){
 	}
 
-	public void switchMode(int mode){
+	public void switchMode(){
 	}
 
 	public void fillBuffer(){
@@ -116,6 +131,7 @@ public class Line{
 		for(int i = 0; i < numberOfChars; i++){
 			str+=buffer[i];
 		}
+		System.out.print("\033[" + cursPos + "D");
 		return str;
 	}
 
