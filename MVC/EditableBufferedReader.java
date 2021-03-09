@@ -1,111 +1,121 @@
 import java.io.*;
 
-public class EditableBufferedReader extends BufferedReader{
+public class EditableBufferedReader extends BufferedReader {
 
-	private Line line;
-	private Console con;
-	
+    private Line line;
+    private Console con;
 
-	public EditableBufferedReader(Reader in){
-		super(in);
-		line = new Line();
-		con = new Console();
-		line.addObserver(con);
-		
-	}
 
-	public static void setRaw(){
-		try{
-			Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "stty raw -echo </dev/tty"});	
-		}
-		catch (IOException e) { e.printStackTrace(); }
-	}
+    public EditableBufferedReader(Reader in ) {
+        super( in );
+        line = new Line();
+        con = new Console();
+        line.addObserver(con);
 
-	public static void unsetRaw(){
-		try{
-			Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "stty -raw echo </dev/tty"});
-		}
-		catch (IOException e) { e.printStackTrace(); }
-	}
+    }
 
-	public int read() throws IOException{
-		int c = super.read();
-		
-		if (c == Keys.ESC){
-			int next = super.read();
-			if (next == Keys.CSI){
-				int special = super.read();
-				if(Keys.SpecialsList.contains(special))
-					return (special);
-				else
-					return -1;
-			}
-		}
-		
-		return c;
-		
-	}
+    public static void setRaw() {
+        try {
+            Runtime.getRuntime().exec(new String[] {
+                "/bin/sh",
+                "-c",
+                "stty raw -echo </dev/tty"
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	public String readLine() throws IOException{
-		setRaw();
-		int x = 0;
-		String str = "";	
-		while( (x != Keys.EXIT) && (x != Keys.ENTER)){
-			x = this.read();
-			
-			/*line.addChar((char)x);
-			//System.out.print(x+"");
-			str+=(char)x;
-			line.clearTerminal();
-			System.out.print(line.toString());*/
-	
-			switch(x){
-				case Keys.LEFT:
-					line.moveLeft();
-					
-				break;
+    public static void unsetRaw() {
+        try {
+            Runtime.getRuntime().exec(new String[] {
+                "/bin/sh",
+                "-c",
+                "stty -raw echo </dev/tty"
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-				case Keys.RIGHT:
-					line.moveRight();
-				break;
+    public int read() throws IOException {
+        int c = super.read();
 
-				case Keys.HOME:
-					line.goHome();
-				break;
+        if (c == Keys.ESC) {
+            int next = super.read();
+            if (next == Keys.CSI) {
+                int special = super.read();
+                if (Keys.SpecialsList.contains(special))
+                    return (special);
+                else
+                    return -1;
+            }
+        }
 
-				case Keys.END:
-					line.goEnd();
-				break;
+        return c;
 
-				case Keys.INSERT:
-					if(super.read() == Keys.TILDE)
-						line.switchMode();
-				break;
+    }
 
-				case Keys.BACKSPACE:
-					line.deleteChar();
-				break;
+    public String readLine() throws IOException {
+        setRaw();
+        int x = 0;
+        String str = "";
+        while ((x != Keys.EXIT) && (x != Keys.ENTER)) {
+            x = this.read();
 
-				case Keys.SUPR:
-					if(super.read() == Keys.TILDE)
-						line.supr();
+            /*line.addChar((char)x);
+            //System.out.print(x+"");
+            str+=(char)x;
+            line.clearTerminal();
+            System.out.print(line.toString());*/
 
-				case -1:
-				break;
-					
+            switch (x) {
+                case Keys.LEFT:
+                    line.moveLeft();
 
-				default:
-					line.addChar((char)x);
-					
-			}
-					
-					
-		
-			
-		}
-		str = line.toString();
-		unsetRaw();
-		return str;	
-	}
+                    break;
+
+                case Keys.RIGHT:
+                    line.moveRight();
+                    break;
+
+                case Keys.HOME:
+                    line.goHome();
+                    break;
+
+                case Keys.END:
+                    line.goEnd();
+                    break;
+
+                case Keys.INSERT:
+                    if (super.read() == Keys.TILDE)
+                        line.switchMode();
+                    break;
+
+                case Keys.BACKSPACE:
+                    line.deleteChar();
+                    break;
+
+                case Keys.SUPR:
+                    if (super.read() == Keys.TILDE)
+                        line.supr();
+
+                case -1:
+                    break;
+
+
+                default:
+                    line.addChar((char) x);
+
+            }
+
+
+
+
+        }
+        str = line.toString();
+        unsetRaw();
+        return str;
+    }
 
 }
