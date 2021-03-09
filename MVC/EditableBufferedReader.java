@@ -52,6 +52,12 @@ public class EditableBufferedReader extends BufferedReader{
 		String str = "";	
 		while( (x != Keys.EXIT) && (x != Keys.ENTER)){
 			x = this.read();
+			
+			/*line.addChar((char)x);
+			//System.out.print(x+"");
+			str+=(char)x;
+			line.clearTerminal();
+			System.out.print(line.toString());*/
 	
 			switch(x){
 				case Keys.LEFT:
