@@ -32,7 +32,7 @@ public class Client {
                     while ((line = s.readLine()) != null) {
                         System.out.print("\033[2K");
                         System.out.print("\033[1G");
-                        System.out.print(line+"\n");
+                        System.out.print("\033[0;31m"+line+"\n");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
