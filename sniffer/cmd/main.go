@@ -2,14 +2,17 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"time"
 
+	//Sniffer libraries
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
-	internal "github.com/xonork/SAD/sniffer/internal/mypacket"
 
+	//Internal libraries
+	"github.com/xonork/SAD/sniffer/internal/mypacket"
+
+	//GUI libraries
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -18,13 +21,12 @@ import (
 )
 
 var (
-	device         string = "enp0s3"
-	snapshot_len   int32  = 1024
-	promiscuous    bool   = false
+	snapshot_len   int32 = 1024
+	promiscuous    bool  = false
 	err            error
 	timeout        time.Duration = 30 * time.Second
 	handle         *pcap.Handle
-	componentsList = []string{"hola"}
+	componentsList = []string{}
 )
 
 func main() {
@@ -51,11 +53,12 @@ func main() {
 	window.Resize(fyne.NewSize(800, 600))
 
 	//Flags
+	var device *string = flag.String("d", "", "Network Interface")
 	filter := flag.String("f", "", "BPF syntax")
 	flag.Parse()
 
 	//Opens the device and returns a handler
-	handle, err = pcap.OpenLive(device, snapshot_len, promiscuous, timeout)
+	handle, err = pcap.OpenLive(*device, snapshot_len, promiscuous, timeout)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,9 +71,9 @@ func main() {
 	}
 
 	//Initializes the decoder
-	d := internal.DecodeLayersVar{}
+	d := mypacket.DecodeLayersVar{}
 	//Initializes the channel
-	var ch = make(chan internal.Packet)
+	var ch = make(chan mypacket.Packet)
 	//Starts sniffing
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 
@@ -89,36 +92,13 @@ func main() {
 	go func() {
 		for {
 			if i, ok := <-ch; ok {
-				componentsList = append(componentsList, internal.PacketToString(i))
+				componentsList = append(componentsList, mypacket.PacketToString(i))
 				componentsTree.Refresh()
 				cont.Refresh()
-				//fmt.Println("Protocol: " + i.HighestProtocol + " Ports: " + strconv.Itoa(i.SrcPort) + " ---> " + strconv.Itoa(i.DstPort))
 			}
 		}
 	}()
 
 	window.ShowAndRun()
 
-}
-
-func makeTableTab(_ fyne.Window) fyne.CanvasObject {
-	t := widget.NewTable(
-		func() (int, int) { return 1, 6 },
-		func() fyne.CanvasObject {
-			return widget.NewLabel("Cell 000, 000")
-		},
-		func(id widget.TableCellID, cell fyne.CanvasObject) {
-			label := cell.(*widget.Label)
-			switch id.Col {
-			case 0:
-				label.SetText(fmt.Sprintf("%d", id.Row+1))
-			case 1:
-				label.SetText("A longer cell")
-			default:
-				label.SetText(fmt.Sprintf("Cell %d, %d", id.Row+1, id.Col+1))
-			}
-		})
-	t.SetColumnWidth(0, 34)
-	t.SetColumnWidth(1, 102)
-	return t
 }
