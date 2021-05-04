@@ -1,4 +1,4 @@
-package internal
+package mypacket
 
 import (
 	"bufio"
@@ -10,6 +10,10 @@ import (
 	"github.com/google/gopacket/layers"
 )
 
+/*
+	Defines the layers which
+	are going to be decoded
+*/
 type DecodeLayersVar struct {
 	ethLayer layers.Ethernet
 	ipLayer  layers.IPv4
@@ -19,6 +23,11 @@ type DecodeLayersVar struct {
 	dnsLayer layers.DNS
 }
 
+/*
+	Defines the struct Packet,
+	which contains information
+	about the analized packet
+*/
 type Packet struct {
 	SrcMac          string
 	DstMac          string
@@ -26,8 +35,8 @@ type Packet struct {
 	DstIP           string
 	SrcPort         int
 	DstPort         int
-	SYN             string
-	ACK             string
+	SYN             bool
+	ACK             bool
 	HTTPReques      http.Request
 	HighestProtocol string
 	DNS             Dns
@@ -70,8 +79,8 @@ func (d *DecodeLayersVar) FasterDecoder(packet gopacket.Packet, ch chan<- Packet
 		case layers.LayerTypeTCP:
 			myPacket.SrcPort = int(d.tcpLayer.SrcPort)
 			myPacket.DstPort = int(d.tcpLayer.DstPort)
-			myPacket.SYN = strconv.FormatBool(d.tcpLayer.SYN)
-			myPacket.ACK = strconv.FormatBool(d.tcpLayer.ACK)
+			myPacket.SYN = d.tcpLayer.SYN
+			myPacket.ACK = d.tcpLayer.ACK
 			myPacket.HighestProtocol = "TCP"
 			if payload := d.tcpLayer.Payload; len(payload) != 0 {
 				reader := bufio.NewReader(bytes.NewReader(payload))
@@ -91,8 +100,48 @@ func (d *DecodeLayersVar) FasterDecoder(packet gopacket.Packet, ch chan<- Packet
 			myPacket.DNS.Answers = d.dnsLayer.Answers
 			myPacket.DNS.Questions = d.dnsLayer.Questions
 			myPacket.DNS.OpCode = d.dnsLayer.OpCode.String()
+			myPacket.HighestProtocol = "DNS"
 
 		}
 	}
 	ch <- myPacket
+}
+
+func PacketToString(p Packet) string {
+	var str string
+
+	switch p.HighestProtocol {
+	case "Ethernet":
+		str = p.SrcMac + "\t" + p.DstMac + "\t" + p.HighestProtocol + "\t"
+	case "IPv4":
+		str = p.SrcIP + "\t" + p.DstIP + "\t" + p.HighestProtocol
+	case "TCP":
+		str = p.SrcIP + "\t" + p.DstIP + "\t" + p.HighestProtocol + "\t" +
+			strconv.Itoa(p.SrcPort) + " -> " + strconv.Itoa(p.DstPort) + " "
+		switch {
+		case p.ACK && p.SYN:
+			str = str + "[ SYN, ACK ]"
+		case p.ACK:
+			str = str + "[ ACK ]"
+		case p.SYN:
+			str = str + "[ SYN ]"
+		}
+	case "UDP":
+		str = p.SrcIP + "\t" + p.DstIP + "\t" + p.HighestProtocol + "\t" +
+			strconv.Itoa(p.SrcPort) + " -> " + strconv.Itoa(p.DstPort)
+	case "HTTP":
+		str = p.SrcIP + "\t" + p.DstIP + "\t" + p.HighestProtocol + "\t" +
+			p.HTTPReques.Method
+	case "DNS":
+		str = p.SrcIP + "\t" + p.DstIP + "\t" + p.HighestProtocol + "\t" +
+			"OpCode: " + p.DNS.OpCode + " "
+		for _, query := range p.DNS.Questions {
+			str = str + string(query.Name) + " "
+		}
+
+	default:
+		str = p.SrcIP + "\t" + p.DstIP + "\t" + p.HighestProtocol
+	}
+
+	return str
 }
