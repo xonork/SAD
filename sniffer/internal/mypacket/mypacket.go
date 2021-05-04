@@ -24,7 +24,7 @@ type DecodeLayersVar struct {
 }
 
 /*
-	Defines the struct Packet,
+	Defines the Packet struct,
 	which contains information
 	about the analized packet
 */
@@ -42,14 +42,28 @@ type Packet struct {
 	DNS             Dns
 }
 
+/*
+	Defines the struct Dns,
+	which contains DNS information
+*/
 type Dns struct {
 	Answers   []layers.DNSResourceRecord
 	Questions []layers.DNSQuestion
 	OpCode    string
 }
 
+/*
+	A packet and a channel are provided
+	to this function, then, it will decode
+	the packet, and it will send it through
+	the channel
+*/
 func (d *DecodeLayersVar) FasterDecoder(packet gopacket.Packet, ch chan<- Packet) {
 
+	/*
+		Defines which layers are going
+		to be decoded
+	*/
 	parser := gopacket.NewDecodingLayerParser(
 		layers.LayerTypeEthernet,
 		&d.ethLayer,
@@ -59,12 +73,15 @@ func (d *DecodeLayersVar) FasterDecoder(packet gopacket.Packet, ch chan<- Packet
 		&d.udpLayer,
 		&d.dnsLayer,
 	)
+
 	foundLayerTypes := []gopacket.LayerType{}
 	myPacket := Packet{}
-	/*err :=*/ parser.DecodeLayers(packet.Data(), &foundLayerTypes)
-	/*if err != nil {
-		fmt.Println("Trouble decoding layers: ", err)
-	}*/
+	parser.DecodeLayers(packet.Data(), &foundLayerTypes)
+
+	/*
+		Once the layers are decoded, it starts
+		defining the Packet struct variables
+	*/
 	for _, layerType := range foundLayerTypes {
 
 		switch layerType {
@@ -107,6 +124,10 @@ func (d *DecodeLayersVar) FasterDecoder(packet gopacket.Packet, ch chan<- Packet
 	ch <- myPacket
 }
 
+/*
+	A Packet struct is provided,
+	and it is turned into string
+*/
 func PacketToString(p Packet) string {
 	var str string
 
