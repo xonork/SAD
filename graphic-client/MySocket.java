@@ -39,3 +39,4 @@ public class MySocket {
         clientNick = nick;
     }
 }
+

@@ -12,3 +12,4 @@ public class Colors{
     
     public static final String[] COLORS_LIST = {RED, GREEN,YELLOW,BLUE,PURPLE,CYAN,WHITE};
 }
+

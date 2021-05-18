@@ -19,7 +19,7 @@ public class Worker implements Runnable {
     public void broadcast(String line) {
         try {
             for (String i: map.keySet()) {
-                map.get(i).println(myColor + s.getNick() + "> " + Colors.RESET + line);
+                map.get(i).println(s.getNick() + "> "  + line);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -53,3 +53,4 @@ public class Worker implements Runnable {
 
 
 }
+

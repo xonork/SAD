@@ -1,10 +1,8 @@
 import java.io.*;
-import javax.swing.*;
 
 public class Client {
 
     public static void main(String[] args) throws NumberFormatException, IOException {
-    	System.out.print(System.getProperty("java.classpath"));
         MySocket s = new MySocket(args[0], Integer.parseInt(args[1]), args[2]);
         s.println(s.getNick());
         new Thread() {
@@ -42,5 +40,5 @@ public class Client {
             }
         }.start();
     }
-    
 }
+
