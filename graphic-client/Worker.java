@@ -8,7 +8,7 @@ public class Worker implements Runnable {
     private MySocket s;
     private ReentrantLock lock;
     private static int threads = 0;
-    private String myColor;
+
 
     public Worker(ReentrantLock lock, ConcurrentHashMap < String, MySocket > map, MySocket s) {
         this.map = map;
@@ -19,7 +19,7 @@ public class Worker implements Runnable {
     public void broadcast(String line) {
         try {
             for (String i: map.keySet()) {
-                map.get(i).println(s.getNick() + "> "  + line);
+                map.get(i).println(line);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -29,22 +29,24 @@ public class Worker implements Runnable {
     public void run() {
         try {
             s.putNick(s.readLine());
+            String newNick = "0," + s.getNick();
+            broadcast(newNick);
+            map.put(s.getNick(), s);
+            s.println("0," + map.keySet());
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        map.put(s.getNick(), s);
-
         String line;
-
         lock.lock();
-        this.myColor = Colors.COLORS_LIST[threads % Colors.COLORS_LIST.length];
         threads++;
         lock.unlock();
 
         try {
             while ((line = map.get(s.getNick()).readLine()) != null)
-                broadcast(line);
+                broadcast("1," + s.getNick() + " -> " + line);
+            broadcast("2," + s.getNick());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,4 +55,3 @@ public class Worker implements Runnable {
 
 
 }
-
